@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "ApiGateway": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:56080",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CONSUL_HTTP_ADDR": "http://localhost:8500",
+        "PORT": "56080",
+        "SERVICE_NAME": "apigateway",
+        "SERVICE_HOST": "localhost",
+        "SERVICE_PORT": "56080"
+      }
+    }
+  }
+}

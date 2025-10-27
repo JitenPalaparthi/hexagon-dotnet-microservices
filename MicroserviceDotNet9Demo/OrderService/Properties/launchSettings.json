@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "OrderService": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5003",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CATALOG_BASE": "http://localhost:5001/"
+      }
+    }
+  }
+}

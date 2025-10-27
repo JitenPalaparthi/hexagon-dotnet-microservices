@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "OrderService": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5003",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "PORT": "5003",
+        "CONSUL_HTTP_ADDR": "http://localhost:8500",
+        "SERVICE_NAME": "orders",
+        "SERVICE_HOST": "localhost",
+        "SERVICE_PORT": "5003"
+      }
+    }
+  }
+}
