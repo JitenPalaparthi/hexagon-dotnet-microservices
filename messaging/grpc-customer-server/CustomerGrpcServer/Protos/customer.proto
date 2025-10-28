@@ -27,10 +27,13 @@ message DeleteCustomerResponse { bool success = 1; }
 message ListCustomersRequest { int32 page_size = 1; string page_token = 2; }
 message ListCustomersResponse { repeated Customer customers = 1; string next_page_token = 2; }
 
+message GetAllCustomersRequest{}
+
 service CustomerManager {
   rpc CreateCustomer (CreateCustomerRequest) returns (CreateCustomerResponse);
   rpc GetCustomer (GetCustomerRequest) returns (GetCustomerResponse);
   rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
   rpc DeleteCustomer (DeleteCustomerRequest) returns (DeleteCustomerResponse);
   rpc ListCustomers (ListCustomersRequest) returns (ListCustomersResponse);
+
 }
