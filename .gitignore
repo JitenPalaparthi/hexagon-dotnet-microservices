@@ -1,0 +1,165 @@
+##########################################
+# Global .NET and IDE Git Ignore Template
+# Works for multiple repositories and environments
+##########################################
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Tt]emp/
+[Tt]est[Rr]esults/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+artifacts/
+
+# .NET Intermediate Files
+*.pdb
+*.cache
+*.mdb
+*.pidb
+*.log
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vspscc
+*.vssscc
+
+# Auto-generated files
+*.Generated.*
+*.AssemblyInfo.*
+*.ncrunchsolution
+*.ncrunchproject
+*.nunit
+*.vshost.*
+
+# ASP.NET temp
+aspnet_client/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+# The packages folder can be ignored because of restore
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+!**/[Pp]ackages/repositories.config
+
+# npm and frontend build artifacts (for Blazor or React frontends)
+node_modules/
+dist/
+build/
+wwwroot/lib/
+wwwroot/dist/
+coverage/
+*.tsbuildinfo
+
+# VS Code
+.vscode/
+.history/
+*.code-workspace
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio
+.vs/
+*.dbmdl
+*.jfm
+*.VC.db
+*.VC.VC.opendb
+*.psess
+*.vsp
+*.vspx
+*.sap
+*.cachefile
+
+# User-specific files
+*.rsuser
+*.userprefs
+*.suo
+*.user
+*.tss
+*.orig
+*.swp
+
+# Docker & Containers
+docker-compose.override.yml
+**/Dockerfile.local
+**/docker-compose.*
+.dockerignore
+.docker/
+.docker-build/
+
+# OS Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Unit test coverage
+coverage/
+*.coverage
+*.coveragexml
+*.opencover.xml
+TestResults/
+
+# Azure & Cloud Artifacts
+*.publishsettings
+*.azurePubxml
+*.pubxml
+*.Publish.xml
+app.publish/
+*.wpp.targets
+*.publishproj
+
+# Entity Framework
+*.db
+*.bak
+Migrations/
+
+# Logs and diagnostics
+*.log
+*.trace
+*.svclog
+*.etl
+
+# Temporary files
+~$*
+*.tmp
+*.bak
+*.old
+*.swp
+
+# Tye / Service discovery
+.tye/
+.tye/**
+
+# local secrets & configs
+secrets.json
+appsettings.Local.json
+appsettings.Development.json
+local.settings.json
+
+# Python virtualenv (if used in ML or tools)
+.venv/
+venv/
+__pycache__/
+
+# Git
+.gitconfig
+.gitmodules
+
+##########################################
+# End of .gitignore
+##########################################
