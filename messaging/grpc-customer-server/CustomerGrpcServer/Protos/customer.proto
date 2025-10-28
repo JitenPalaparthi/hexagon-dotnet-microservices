@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package customer;
+option csharp_namespace = "Customer.Grpc";
+
+import "google/protobuf/timestamp.proto";
+
+message Customer {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message CreateCustomerRequest { string name = 1; string email = 2; }
+message CreateCustomerResponse { Customer customer = 1; }
+
+message GetCustomerRequest { string id = 1; }
+message GetCustomerResponse { Customer customer = 1; }
+
+message UpdateCustomerRequest { string id = 1; string name = 2; string email = 3; }
+message UpdateCustomerResponse { Customer customer = 1; }
+
+message DeleteCustomerRequest { string id = 1; }
+message DeleteCustomerResponse { bool success = 1; }
+
+message ListCustomersRequest { int32 page_size = 1; string page_token = 2; }
+message ListCustomersResponse { repeated Customer customers = 1; string next_page_token = 2; }
+
+service CustomerManager {
+  rpc CreateCustomer (CreateCustomerRequest) returns (CreateCustomerResponse);
+  rpc GetCustomer (GetCustomerRequest) returns (GetCustomerResponse);
+  rpc UpdateCustomer (UpdateCustomerRequest) returns (UpdateCustomerResponse);
+  rpc DeleteCustomer (DeleteCustomerRequest) returns (DeleteCustomerResponse);
+  rpc ListCustomers (ListCustomersRequest) returns (ListCustomersResponse);
+}
