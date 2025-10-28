@@ -1,0 +1,16 @@
+# Accept EULAs (required)
+ACCEPT_EULA=Y
+MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+SQL_WAIT_INTERVAL=15
+
+# Local Azure Service Bus Emulator connection string
+# Works with the emulator. Key name/value are ignored; the important flag is UseDevelopmentEmulator=true
+# If your apps run as containers on the same compose network, you can use the container name:
+SERVICEBUS__CONNECTIONSTRING=Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;
+
+# Queue name (declared in emulator/config.json)
+QUEUE__NAME=demo-queue
+
+# Consumer tuning
+PROCESSOR__MAXCONCURRENT=4
+PROCESSOR__PREFETCH=10
