@@ -1,0 +1,41 @@
+{
+  "UserConfig": {
+    "Namespaces": [
+      {
+        "Name": "sbemulatorns",
+        "Queues": [],
+        "Topics": [
+          {
+            "Name": "demo-topic",
+            "Properties": {
+              "DefaultMessageTimeToLive": "PT30M"
+            },
+            "Subscriptions": [
+              {
+                "Name": "sub-a",
+                "Properties": {
+                  "RequiresSession": true,
+                  "MaxDeliveryCount": 3,
+                  "DefaultMessageTimeToLive": "PT30M",
+                  "DeadLetteringOnMessageExpiration": true
+                }
+              },
+              {
+                "Name": "sub-b",
+                "Properties": {
+                  "RequiresSession": true,
+                  "MaxDeliveryCount": 3,
+                  "DefaultMessageTimeToLive": "PT30M",
+                  "DeadLetteringOnMessageExpiration": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Logging": {
+      "Type": "File"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "UserConfig": {
+    "Namespaces": [
+      {
+        "Name": "sbemulatorns",
+        "Queues": [
+          {
+            "Name": "orders-queue",
+            "Properties": {
+              "RequiresSession": true,
+              "LockDuration": "PT30S",
+              "MaxDeliveryCount": 3,
+              "DefaultMessageTimeToLive": "PT30M",
+              "DeadLetteringOnMessageExpiration": true
+            }
+          }
+        ],
+        "Topics": []
+      }
+    ],
+    "Logging": {
+      "Type": "File"
+    }
+  }
+}

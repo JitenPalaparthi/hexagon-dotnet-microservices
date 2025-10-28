@@ -564,11 +564,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/producer/Producer.csproj",
+      "projectUniqueName": "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/producer/Producer.csproj",
       "projectName": "Producer",
-      "projectPath": "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/producer/Producer.csproj",
+      "projectPath": "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/producer/Producer.csproj",
       "packagesPath": "/Users/jiten/.nuget/packages/",
-      "outputPath": "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/producer/obj/",
+      "outputPath": "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/producer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/jiten/.nuget/NuGet/NuGet.Config"

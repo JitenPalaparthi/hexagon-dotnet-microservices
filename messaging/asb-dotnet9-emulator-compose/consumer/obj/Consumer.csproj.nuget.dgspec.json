@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/consumer/Consumer.csproj": {}
+    "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/consumer/Consumer.csproj": {}
   },
   "projects": {
-    "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/consumer/Consumer.csproj": {
+    "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/consumer/Consumer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/consumer/Consumer.csproj",
+        "projectUniqueName": "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/consumer/Consumer.csproj",
         "projectName": "Consumer",
-        "projectPath": "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/consumer/Consumer.csproj",
+        "projectPath": "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/consumer/Consumer.csproj",
         "packagesPath": "/Users/jiten/.nuget/packages/",
-        "outputPath": "/Users/jiten/workspace/training/hexagon-training/asb-dotnet9-emulator-compose/consumer/obj/",
+        "outputPath": "/Users/jiten/workspace/training/hexagon-training/messaging/asb-dotnet9-emulator-compose/consumer/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/jiten/.nuget/NuGet/NuGet.Config"
