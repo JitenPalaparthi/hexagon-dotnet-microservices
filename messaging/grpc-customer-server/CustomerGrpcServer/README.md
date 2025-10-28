@@ -66,11 +66,13 @@ grpcurl -plaintext -import-path Protos -proto customer.proto -d '{}' localhost:5
 
 ### db details 
 
-docker run -d \
-  --name pg-customerdb \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=customerdb \
-  -p 5432:5432 \
-  -v pgdata_customerdb:/var/lib/postgresql/data \
-  postgres:16
+```bash
+
+docker network create demo-netowrk
+
+docker network ls 
+
+docker run -d  --name pg-customerdb  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres  -e POSTGRES_DB=customerdb -p 5432:5432 --network demo-network -v pgdata_customerdb:/var/lib/postgresql/data  postgres:16
+
+docker run -d --name dbui -p 8080:8080 --network demo-network adminer
+```
