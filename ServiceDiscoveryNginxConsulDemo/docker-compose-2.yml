@@ -13,7 +13,7 @@ services:
 
   catalog2:
     build: { context: ., dockerfile: CatalogService/Dockerfile }
-    container_name: catalog
+    container_name: catalog2
     depends_on: [consul]
     ports: ["55002:8080"]  
 
