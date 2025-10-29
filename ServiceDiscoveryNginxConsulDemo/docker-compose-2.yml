@@ -1,0 +1,30 @@
+services:
+  consul:
+    image: hashicorp/consul:1.16
+    container_name: consul
+    ports: ["8500:8500"]
+    command: ["agent", "-dev", "-client=0.0.0.0", "-ui"]
+
+  catalog:
+    build: { context: ., dockerfile: CatalogService/Dockerfile }
+    container_name: catalog
+    depends_on: [consul]
+    ports: ["55001:8080"]
+
+  catalog2:
+    build: { context: ., dockerfile: CatalogService/Dockerfile }
+    container_name: catalog
+    depends_on: [consul]
+    ports: ["55002:8080"]  
+
+  orders:
+    build: { context: ., dockerfile: OrderService/Dockerfile }
+    container_name: orders
+    depends_on: [consul, catalog]
+    ports: ["55003:8080"]
+
+  nginx-gateway:
+    build: { context: ./nginx, dockerfile: Dockerfile }
+    container_name: nginx-gateway
+    depends_on: [catalog, orders]
+    ports: ["55080:8080"]
