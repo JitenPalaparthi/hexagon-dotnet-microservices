@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package patterns;
+option csharp_namespace = "Patterns.Grpc";
+
+message EchoRequest { string text = 1; }
+message EchoReply { string text = 1; }
+
+message NumbersRequest { int32 count = 1; }
+message Number { int32 value = 1; }
+
+message SumRequest { int32 value = 1; }
+message SumReply { int64 sum = 1; }
+
+message ChatMessage { string from = 1; string text = 2; int64 unix_time_ms = 3; }
+
+service Patterns {
+  rpc UnaryEcho (EchoRequest) returns (EchoReply);
+  rpc ServerStreamNumbers (NumbersRequest) returns (stream Number);
+  rpc ClientStreamSum (stream SumRequest) returns (SumReply);
+  rpc Chat (stream ChatMessage) returns (stream ChatMessage);
+}
