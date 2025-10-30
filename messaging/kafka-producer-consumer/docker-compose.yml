@@ -1,0 +1,60 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.7.0
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"     # internal (docker network)
+      - "29092:29092"   # host access
+    environment:
+      # KRaft (no ZooKeeper)
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+       - kafka_data:/var/lib/kafka/data
+
+  producerapi:
+    build:
+      context: ./src/ProducerApi
+      dockerfile: Dockerfile
+    container_name: producerapi
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      Kafka__BootstrapServers: kafka:9092
+      Kafka__Topic: demo-messages
+    ports:
+      - "8080:8080"
+    depends_on:
+      kafka:
+        condition: service_started
+
+  consumerworker:
+    build:
+      context: ./src/ConsumerWorker
+      dockerfile: Dockerfile
+    container_name: consumerworker
+    environment:
+      Kafka__BootstrapServers: kafka:9092
+      Kafka__Topic: demo-messages
+      Kafka__GroupId: dotnet-consumer-1
+      Kafka__AutoOffsetReset: Earliest
+    depends_on:
+      kafka:
+        condition: service_started
+
+volumes:
+  kafka_data:
+    driver: local

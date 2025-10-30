@@ -1,0 +1,28 @@
+services:
+  catalog:
+    build:
+      context: .
+      dockerfile: CatalogService/Dockerfile
+    container_name: catalog
+    ports: ["5001:8080"]
+
+  orders:
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+    container_name: orders
+    environment:
+      - CATALOG_BASE=http://catalog:8080/
+    ports: ["5003:8080"]
+    depends_on: ["catalog"]
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    container_name: gateway
+    environment:
+      - CATALOG_BASE=http://catalog:8080/
+      - ORDERS_BASE=http://orders:8080/
+    ports: ["5080:8080"]
+    depends_on: ["catalog", "orders"]

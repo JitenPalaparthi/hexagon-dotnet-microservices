@@ -1,0 +1,71 @@
+services:
+  # --- Azure Service Bus Emulator + SQL dependency ---
+  emulator:
+    container_name: servicebus-emulator
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    pull_policy: always
+    env_file:
+      - .env
+    environment:
+      SQL_SERVER: mssql
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      SQL_WAIT_INTERVAL: ${SQL_WAIT_INTERVAL:-15}
+    volumes:
+      - ./emulator/config.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
+    ports:
+      - "5672:5672"   # AMQP
+      - "5300:5300"   # diagnostics (if enabled)
+    depends_on:
+      - mssql
+    networks:
+      - sbnet
+
+  mssql:
+    container_name: mssql
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - .env
+    environment:
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    networks:
+      - sbnet
+
+  # # --- Your apps ---
+  # producer:
+  #   build:
+  #     context: ./producer
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     ASPNETCORE_URLS: http://+:8080
+  #     SERVICEBUS__CONNECTIONSTRING: ${SERVICEBUS__CONNECTIONSTRING}
+  #     QUEUE__NAME: ${QUEUE__NAME}
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - emulator
+  #   networks:
+  #     - sbnet
+
+  # consumer:
+  #   build:
+  #     context: ./consumer
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     SERVICEBUS__CONNECTIONSTRING: ${SERVICEBUS__CONNECTIONSTRING}
+  #     QUEUE__NAME: ${QUEUE__NAME}
+  #     PROCESSOR__MAXCONCURRENT: ${PROCESSOR__MAXCONCURRENT:-4}
+  #     PROCESSOR__PREFETCH: ${PROCESSOR__PREFETCH:-10}
+  #   depends_on:
+  #     - emulator
+  #   networks:
+  #     - sbnet
+
+networks:
+  sbnet:
+    driver: bridge
