@@ -1,0 +1,4 @@
+Dockerfile*
+coverage.txt
+*.log
+Makefile*

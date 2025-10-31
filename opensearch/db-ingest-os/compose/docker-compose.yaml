@@ -1,0 +1,383 @@
+x-spilo-image: &spilo_image ghcr.io/zalando/spilo-16:3.3-p1
+
+networks:
+  patroninet:
+
+volumes:
+  etcd-data:
+  pg1-data:
+  pg2-data:
+  pg3-data:
+  kafka_data:
+  opensearch-data:   # <— added
+
+services:
+  haproxy:
+      image: docker.io/library/haproxy:2.9
+      networks: [patroninet]
+      volumes:
+        - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      ports:
+        - "50000:5000"   # rw (leader) port
+        - "5001:5001"   # ro (replicas) port
+      depends_on: [patroni1, patroni2, patroni3]
+      healthcheck:
+        # mark healthy when the TCP port is accepting connections
+        test: ["CMD", "bash", "-lc", "exec 3<>/dev/tcp/127.0.0.1/5000 && echo -e 'quit' >&3 || exit 1"]
+        interval: 5s
+        timeout: 3s
+        retries: 30
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.12
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd0
+      - --data-dir=/etcd-data
+      # advertise WHAT clients should use (must be routable): use service DNS
+      - --advertise-client-urls=http://etcd:2379
+      - --listen-client-urls=http://0.0.0.0:2379
+
+      # peer URLs (ok to listen on 0.0.0.0, advertise the DNS)
+      - --initial-advertise-peer-urls=http://etcd:2380
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-cluster=etcd0=http://etcd:2380
+      - --initial-cluster-state=new
+    ports:
+      - "2379:2379"   # optional; only needed from host
+    networks: [patroninet]
+    volumes:
+      - etcd-data:/etcd-data
+  patroni1:
+    image: *spilo_image
+    hostname: patroni1
+   # env_file: [./env/patroni1.env]
+    networks: [patroninet]
+    volumes:
+      - pg1-data:/home/postgres/pgdata
+    environment:
+      SPILO_CONFIGURATION: |
+        scope: demo
+        etcd3:
+          hosts: ["etcd:2379"]
+        bootstrap:
+          dcs:
+            loop_wait: 10
+            ttl: 30
+            postgresql:
+              parameters:
+                max_connections: 200
+                shared_buffers: 256MB
+                wal_level: logical
+                max_wal_senders: 10
+                max_replication_slots: 10
+          # Optional: initial DB options (not passwords)
+          initdb:
+            - encoding: UTF8
+            - data-checksums
+          # You can also seed default users here if you prefer (alternative to the authentication block below)
+
+        postgresql:
+          listen: 0.0.0.0:5432
+          connect_address: patroni1:5432   # patroni2 / patroni3 on the other nodes            
+          authentication:
+            superuser:
+              username: postgres
+              password: postgres
+            replication:
+              username: standby
+              password: standby
+        restapi:
+          listen: 0.0.0.0:8008
+          connect_address: patroni1:8008   # patroni2 / patroni3 on the other nodes
+
+    ports:
+      - "8008:8008"
+    depends_on: [etcd]
+  patroni2:
+    image: *spilo_image
+    hostname: patroni2
+    #env_file: [./env/patroni2.env]
+    networks: [patroninet]
+    ports:
+      - "8009:8008" 
+    volumes:
+      - pg2-data:/home/postgres/pgdata
+    environment:
+      SPILO_CONFIGURATION: |
+        scope: demo
+        etcd3:
+          hosts: ["etcd:2379"]
+
+        bootstrap:
+          dcs:
+            loop_wait: 10
+            ttl: 30
+            postgresql:
+              parameters:
+                max_connections: 200
+                shared_buffers: 256MB
+                wal_level: logical
+                max_wal_senders: 10
+                max_replication_slots: 10
+          # Optional: initial DB options (not passwords)
+          initdb:
+            - encoding: UTF8
+            - data-checksums
+          # You can also seed default users here if you prefer (alternative to the authentication block below)
+
+        postgresql:
+          listen: 0.0.0.0:5432
+          connect_address: patroni2:5432   # patroni2 / patroni3 on the other nodes
+          authentication:
+            superuser:
+              username: postgres
+              password: postgres
+            replication:
+              username: standby
+              password: standby
+
+        restapi:
+          listen: 0.0.0.0:8008
+          connect_address: patroni2:8008   # patroni2 / patroni3 on the other nodes
+
+    depends_on: [etcd,patroni1]
+  patroni3:
+    image: *spilo_image
+    hostname: patroni3
+   # env_file: [./env/patroni3.env]
+    networks: [patroninet]
+    ports:
+      - "8010:8008" 
+    volumes:
+      - pg3-data:/home/postgres/pgdata
+    environment:
+      SPILO_CONFIGURATION: |
+        scope: demo
+        etcd3:
+          hosts: ["etcd:2379"]
+
+        bootstrap:
+          dcs:
+            loop_wait: 10
+            ttl: 30
+            postgresql:
+              parameters:
+                max_connections: 200
+                shared_buffers: 256MB
+                wal_level: logical
+                max_wal_senders: 10
+                max_replication_slots: 10
+          # Optional: initial DB options (not passwords)
+          initdb:
+            - encoding: UTF8
+            - data-checksums
+          # You can also seed default users here if you prefer (alternative to the authentication block below)
+
+        postgresql:
+          listen: 0.0.0.0:5432
+          connect_address: patroni3:5432   # patroni2 / patroni3 on the other nodes
+          
+          authentication:
+            superuser:
+              username: postgres
+              password: postgres
+            replication:
+              username: standby
+              password: standby
+        restapi:
+          listen: 0.0.0.0:8008
+          connect_address: patroni3:8008   # patroni2 / patroni3 on the other nodes
+
+    depends_on: [etcd,patroni2]
+  adminer:
+    networks: [patroninet]
+    image: adminer:4.8.1
+    restart: always
+    ports:
+      - "18080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: haproxy
+  kafka:
+    networks: [patroninet]
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      # --- existing KRaft config (keep yours) ---
+      CLUSTER_ID: "5hDiE5vETjicqnOmlhZ9Og"
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+
+      # --- listeners (keep yours) ---
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,INTERNAL://0.0.0.0:29092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092,INTERNAL://kafka:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+
+      # --- other settings (keep yours) ---
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+
+      # JMX_PORT: 9010
+      # KAFKA_JMX_HOSTNAME: kafka
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "kafka:29092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+  kafka-ui:
+    networks: [patroninet]
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "18081:8080"
+    environment:
+      CLUSTER_ID: "5hDiE5vETjicqnOmlhZ9Og"
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on:
+      - kafka
+  db-migrator:
+    networks: [patroninet]
+    image: postgres:16
+    restart: "no"
+    depends_on:
+      haproxy:
+        condition: service_healthy
+      patroni1:
+        condition: service_started
+      patroni2:
+        condition: service_started
+      patroni3:
+        condition: service_started
+    environment:
+      PGHOST: haproxy
+      PGPORT: "5000"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGSSLMODE: "require" 
+      APP_DB: mfdb
+      APP_ROLE: appuser
+      APP_PASS: apppass
+    volumes:
+      - "../database/migrations:/migrations:ro"
+      - "./scripts:/scripts:ro"
+    entrypoint: ["/bin/bash","-lc"]
+    command: "/scripts/db_migrate_root.sh"  
+  connect:
+    image: quay.io/debezium/connect:2.6
+    container_name: connect
+    networks: [patroninet]
+    # Only Kafka is required for Connect to come up
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      # --- Kafka ---
+      BOOTSTRAP_SERVERS: kafka:29092
+      GROUP_ID: connect-cluster
+      CONFIG_STORAGE_TOPIC: _connect_configs
+      OFFSET_STORAGE_TOPIC: _connect_offsets
+      STATUS_STORAGE_TOPIC: _connect_statuses
+      # Single broker => RF must be 1 or Connect will start then exit
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+
+      # --- REST listener (be explicit) ---
+      LISTENERS: http://0.0.0.0:8083
+      REST_ADVERTISED_HOST_NAME: connect
+      REST_ADVERTISED_PORT: 8083
+      # Avoid odd IPv6 behavior on Windows/Podman
+      JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
+
+      # --- Plugins path (Debezium already has PG; keep if you add others) ---
+      KAFKA_CONNECT_PLUGIN_PATH: /kafka/connect/plugins
+    volumes:
+      - ./plugins:/kafka/connect/plugins
+    ports:
+      - "18083:8083"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8083/connector-plugins"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+  opensearch:
+    networks: [patroninet]
+    image: opensearchproject/opensearch:latest
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: "true"
+      bootstrap.memory_lock: "false"
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Opensearch@123"
+      # Add this line to skip security setup
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "19200:9200"   # REST API
+      - "19600:9600"   # Performance Analyzer
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+  opensearch-dashboards:
+    networks: [patroninet]
+    image: opensearchproject/opensearch-dashboards:latest
+    environment:
+      OPENSEARCH_HOSTS: "http://opensearch:9200"
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"   # dev only
+      OPENSEARCH_SECURITY_ENABLED: "false"
+
+    ports:
+      - "15601:5601"   # http://localhost:5601
+    depends_on:
+      - opensearch
+  connector-registrar:
+    image: alpine:3.20
+    container_name: connector-registrar
+    networks: [patroninet]     # ensure connect & opensearch are also on this network
+    depends_on:
+      connect:
+        condition: service_started   # switch to service_healthy after you add a healthcheck (below)
+    environment:
+      CONNECT_URL: http://connect:8083
+    volumes:
+      - ./connectors:/work:ro        # contains register.sh and your *.json files
+    entrypoint: ["/bin/sh","-lc"]
+    command: |
+      set -euxo pipefail
+      chmod +x /work/register.sh || true
+      /work/register.sh
+  
+  connect-init:
+    image: curlimages/curl:8.10.1
+    container_name: connect-init
+    depends_on:
+      connect:
+        condition: service_healthy
+    environment:
+      CONNECT_URL: http://connect:8083
+    volumes:
+      - ./connectors:/connectors:ro
+    entrypoint: ["/bin/sh", "-c", "chmod +x /connectors/register-connectors.sh && /connectors/register-connectors.sh"]
+    restart: "no"

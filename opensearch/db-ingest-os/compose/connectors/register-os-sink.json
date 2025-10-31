@@ -1,0 +1,29 @@
+{
+  "name": "os-sink-scheme_data",
+  "config": {
+    "connector.class": "io.aiven.kafka.connect.opensearch.OpensearchSinkConnector",
+    "topics": "mfdb.public.product",
+    "index": "mfdb.public.product",
+    "connection.url": "http://opensearch:9200",
+    
+    "key.ignore": "false",
+    "schema.ignore": "true",
+    "behavior.on.null.values": "delete",
+    "connection.ssl.verification.mode": "none",
+
+    "transforms": "unwrap,extractKey",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "rewrite",
+
+    "transforms.extractKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.extractKey.field": "id",
+    
+    "write.method": "upsert",
+    "batch.size": "2000",
+    "max.in.flight.requests": "1",
+    "linger.ms": "500",
+    "flush.timeout.ms": "60000",
+    "behavior.on.malformed.documents": "warn"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "pg-scheme_data-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "topic.prefix": "mfdb",
+
+    "database.hostname": "haproxy",
+    "database.port": "5000",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname": "mfdb",
+    "database.ssl.mode": "require",
+
+    "plugin.name": "pgoutput",
+    "slot.name": "debezium_slot",
+    "publication.name": "dbz_publication_mfdb",
+    "publication.autocreate.mode": "filtered",
+
+    "snapshot.mode": "initial",
+    "schema.include.list": "public",
+    "table.include.list": "public.product",
+
+    "include.schema.changes": "false",
+    "tombstones.on.delete": "false",
+    "decimal.handling.mode": "string",
+    "heartbeat.interval.ms": "10000",
+    "max.batch.size": "2048",
+    "max.queue.size": "8192"
+  }
+}
