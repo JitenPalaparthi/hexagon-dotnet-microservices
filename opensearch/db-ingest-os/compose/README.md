@@ -17,3 +17,15 @@ curl -X GET "http://localhost:19200/mfdb.public.product/_search?pretty" \
     "size": 100,
     "query": { "match_all": {} }
   }'
+
+
+
+curl -X POST "http://localhost:9200/_msearch?pretty" \
+  -H 'Content-Type: application/x-ndjson' \
+  -d '
+{{ "index": "mfdb.public.product" }
+{ "query": { "match_all": {} }, "size": 5 }
+
+{ "index": "mfdb.public.customer" }
+{ "query": { "match_all": {} }, "size": 5 }}
+'
