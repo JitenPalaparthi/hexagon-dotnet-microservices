@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crudapi
+  namespace: crud-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crudapi
+  template:
+    metadata:
+      labels:
+        app: crudapi
+    spec:
+      containers:
+        - name: crudapi
+          image: ghcr.io/example/crudapi:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://0.0.0.0:8080
+            - name: DB_CONNECTION
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: DB_CONNECTION
+            - name: ASPNETCORE_ENABLE_SWAGGER
+              value: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-secret
+  namespace: crud-demo
+type: Opaque
+stringData:
+  DB_CONNECTION: Host=postgres;Port=5432;Database=cruddb;Username=app;Password=changeme
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crudapi
+  namespace: crud-demo
+spec:
+  selector:
+    app: crudapi
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

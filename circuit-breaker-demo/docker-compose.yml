@@ -1,0 +1,29 @@
+services:
+  unstable:
+    build:
+      context: .
+      dockerfile: src/Unstable/Dockerfile
+    image: cb-unstable:latest
+    environment:
+      - FAILURE_RATE=0.6      # 60% 500s
+      - MIN_MS_DELAY=50
+      - MAX_MS_DELAY=600
+    ports:
+      - "8081:8081"
+    networks: [cbnet]
+
+  gateway:
+    build:
+      context: .
+      dockerfile: src/Gateway/Dockerfile
+    image: cb-gateway:latest
+    environment:
+      - Downstream__BaseUrl=http://unstable:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      - unstable
+    networks: [cbnet]
+
+networks:
+  cbnet: {}

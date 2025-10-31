@@ -368,7 +368,6 @@ services:
       set -euxo pipefail
       chmod +x /work/register.sh || true
       /work/register.sh
-  
   connect-init:
     image: curlimages/curl:8.10.1
     container_name: connect-init
